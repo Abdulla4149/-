@@ -6,7 +6,7 @@ export const config = {
 };
 
 export default async function handler(req: Request) {
-  // Папка pages требует ручной проверки метода
+  // Проверяем метод вручную, так как это не App Router
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
