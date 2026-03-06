@@ -1,15 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-
-type ChatMessage = {
-  id: string;
-  role: 'user' | 'assistant';
-  text: string;
-  createdAt: number;
-};
-
-function uid() {
-  return Math.random().toString(16).slice(2) + Date.now().toString(16);
-}
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useChat } from 'ai/react';
 
 function RobotIcon({ className }: { className?: string }) {
   return (
@@ -59,28 +49,41 @@ function RobotIcon({ className }: { className?: string }) {
 }
 
 export default function AiAssistant() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    {
-      id: uid(),
-      role: 'assistant',
-      text:
-        'Привет! Я AI‑помощник KomekArch. Спроси меня про CPU, память, кэш или конвейеризацию — объясню простыми словами и дам мини‑задачи.',
-      createdAt: Date.now(),
-    },
-  ]);
+  const {
+    messages,
+    input,
+    isLoading,
+    handleInputChange,
+    handleSubmit,
+    setInput,
+  } = useChat({
+    api: '/api/chat',
+    initialMessages: [
+      {
+        id: 'system-1',
+        role: 'system',
+        content:
+          'Ты — KomekArch AI, эксперт по архитектуре ЭВМ. Помогай студентам разбираться в темах процессоров, памяти и ввода-вывода. Отвечай кратко, понятно и на языке пользователя.',
+      },
+      {
+        id: 'greeting-1',
+        role: 'assistant',
+        content:
+          'Привет! Я KomekArch AI. Спроси меня про процессоры, память, кэш или ввод-вывод — объясню простыми словами.',
+      },
+    ],
+  });
 
+  const [isOpen, setIsOpen] = React.useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const suggestions = useMemo(
     () => [
       'Что такое конвейер (pipeline) простыми словами?',
-      'Почему кэш ускоряет программу?',
-      'В чём разница SRAM и DRAM?',
-      'Объясни ISA и микроархитектуру',
+      'Почему кэш иерархия так ускоряет CPU?',
+      'Объясни разницу между SRAM и DRAM.',
+      'Как связаны ISA и микроархитектура?',
     ],
     [],
   );
@@ -94,67 +97,7 @@ export default function AiAssistant() {
   useEffect(() => {
     if (!isOpen) return;
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
-  }, [isOpen, messages.length, isTyping]);
-
-  function addUserMessage(text: string) {
-    setMessages((prev) => [
-      ...prev,
-      { id: uid(), role: 'user', text, createdAt: Date.now() },
-    ]);
-  }
-
-  function addAssistantMessage(text: string) {
-    setMessages((prev) => [
-      ...prev,
-      { id: uid(), role: 'assistant', text, createdAt: Date.now() },
-    ]);
-  }
-
-  function generateDemoAnswer(question: string) {
-    const q = question.toLowerCase();
-    if (q.includes('кэш') || q.includes('cache')) {
-      return (
-        'Кэш — это быстрая память рядом с ядром CPU. Он хранит копии “горячих” данных из RAM, чтобы не ждать медленный доступ.\n\n' +
-        'Мини‑проверка: локальность бывает двух типов — временная и пространственная. Можешь привести по одному примеру?'
-      );
-    }
-    if (q.includes('конвей') || q.includes('pipeline')) {
-      return (
-        'Конвейеризация — это разделение выполнения инструкции на стадии (например: fetch → decode → execute → mem → writeback), чтобы разные инструкции обрабатывались параллельно на разных стадиях.\n\n' +
-        'Частая проблема — hazards (data/control). Хочешь разберём forwarding vs stall на примере?'
-      );
-    }
-    if (q.includes('dram') || q.includes('sram') || q.includes('памят')) {
-      return (
-        'SRAM быстрее и дороже (обычно кэши), DRAM медленнее и дешевле (обычно оперативная память).\n\n' +
-        'Вопрос: почему DRAM “нужно обновлять” (refresh), а SRAM — нет?'
-      );
-    }
-    if (q.includes('isa') || q.includes('микроарх')) {
-      return (
-        'ISA — “контракт” между программой и процессором: какие есть инструкции, регистры, режимы адресации.\n' +
-        'Микроархитектура — как именно конкретный CPU реализует эту ISA (конвейер, кэш, предсказание переходов и т.д.).\n\n' +
-        'Если хочешь — назови ISA (x86-64, ARM, RISC‑V), и я дам короткий маршрут изучения.'
-      );
-    }
-    return (
-      'Понял вопрос. Сейчас у нас демо‑режим без подключения к настоящему ИИ API, но я могу объяснять темы и давать упражнения.\n\n' +
-      'Подсказка: спроси “объясни на примере” или “дай задачу на 5 минут” — так обучение быстрее.'
-    );
-  }
-
-  function send(textRaw: string) {
-    const text = textRaw.trim();
-    if (!text) return;
-    addUserMessage(text);
-    setInput('');
-    setIsTyping(true);
-
-    window.setTimeout(() => {
-      addAssistantMessage(generateDemoAnswer(text));
-      setIsTyping(false);
-    }, 600);
-  }
+  }, [isOpen, messages.length]);
 
   return (
     <div className="fixed bottom-5 right-5 z-[60]">
@@ -186,13 +129,6 @@ export default function AiAssistant() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setMessages((prev) => prev.slice(0, 1))}
-                className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 ring-1 ring-white/10 transition"
-              >
-                Очистить
-              </button>
-              <button
-                type="button"
                 onClick={() => setIsOpen(false)}
                 className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 ring-1 ring-white/10 transition"
                 aria-label="Закрыть чат"
@@ -203,7 +139,9 @@ export default function AiAssistant() {
           </div>
 
           <div ref={listRef} className="px-4 py-4 space-y-3 overflow-y-auto h-[calc(100%-164px)]">
-            {messages.map((m) => (
+            {messages
+              .filter((m) => m.role !== 'system')
+              .map((m) => (
               <div
                 key={m.id}
                 className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -215,12 +153,12 @@ export default function AiAssistant() {
                       : 'bg-white/5 ring-white/10 text-slate-100'
                   }`}
                 >
-                  {m.text}
+                  {m.content}
                 </div>
               </div>
             ))}
 
-            {isTyping && (
+            {isLoading && (
               <div className="flex justify-start">
                 <div className="max-w-[85%] rounded-2xl px-4 py-3 text-sm bg-white/5 ring-1 ring-white/10 text-slate-200">
                   <span className="inline-flex items-center gap-1">
@@ -239,7 +177,7 @@ export default function AiAssistant() {
                   <button
                     key={s}
                     type="button"
-                    onClick={() => send(s)}
+                    onClick={() => setInput(s)}
                     className="text-[11px] px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 transition"
                   >
                     {s}
@@ -251,30 +189,40 @@ export default function AiAssistant() {
 
           <div className="px-4 py-3 border-t border-white/10">
             <div className="flex gap-2 items-end">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    send(input);
-                  }
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!input.trim()) return;
+                  handleSubmit(e);
                 }}
-                rows={2}
-                placeholder="Напиши вопрос… (Enter — отправить, Shift+Enter — новая строка)"
-                className="flex-1 resize-none rounded-2xl bg-white/5 ring-1 ring-white/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400/40 placeholder:text-slate-500"
-              />
-              <button
-                type="button"
-                onClick={() => send(input)}
-                className="h-11 px-4 rounded-2xl bg-indigo-500/20 hover:bg-indigo-500/30 ring-1 ring-indigo-400/30 text-indigo-100 font-semibold text-sm transition"
+                className="flex gap-2 items-end w-full"
               >
-                Отправить
-              </button>
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={handleInputChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      if (!input.trim()) return;
+                      handleSubmit(e as any);
+                    }
+                  }}
+                  rows={2}
+                  placeholder="Напиши вопрос… (Enter — отправить, Shift+Enter — новая строка)"
+                  className="flex-1 resize-none rounded-2xl bg-white/5 ring-1 ring-white/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-400/40 placeholder:text-slate-500"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-11 px-4 rounded-2xl bg-indigo-500/20 hover:bg-indigo-500/30 disabled:opacity-60 disabled:cursor-not-allowed ring-1 ring-indigo-400/30 text-indigo-100 font-semibold text-sm transition"
+                >
+                  Отправить
+                </button>
+              </form>
             </div>
             <div className="mt-2 text-[11px] text-slate-500">
-              Демо‑режим: ответы генерируются локально. Позже подключим настоящий AI API.
+              Работает через Gemini API. Не отправляйте в чат пароли и персональные данные.
             </div>
           </div>
         </div>
