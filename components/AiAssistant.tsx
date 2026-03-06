@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useChat } from 'ai/react';
-
+ 
 function RobotIcon({ className }: { className?: string }) {
   return (
     <svg
