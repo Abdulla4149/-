@@ -5,10 +5,13 @@ export const config = {
   runtime: 'edge',
 };
 
-export default async function handler(req: Request) {
-  // Проверяем метод вручную, так как это не App Router
+// Используем стандартные параметры для Pages Router
+export default async function handler(req: any) {
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { 
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   const { messages } = await req.json();
