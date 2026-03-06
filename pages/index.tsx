@@ -54,7 +54,7 @@ export default function Home() {
                     <div className="container">
                         <h2 className="text-4xl font-bold text-center mb-16">Наши курсы</h2>
                         <div className="grid md:grid-cols-2 gap-8">
-                            <Link href="/courses/basics">
+                            <Link href="/courses/architecture">
                                 <div className="p-8 bg-white rounded-lg shadow-lg hover:shadow-xl transition cursor-pointer border-l-4 border-blue-500">
                                     <h3 className="text-2xl font-bold mb-4">Основы архитектуры</h3>
                                     <p className="text-gray-700 mb-4"> Изучите фундаментальные концепции компьютерной архитектуры </p>
@@ -75,7 +75,7 @@ export default function Home() {
                                     <div className="text-cyan-600 font-bold">Начать курс →</div>
                                 </div>
                             </Link>
-                            <Link href="/courses/networks">
+                            <Link href="/courses/network">
                                 <div className="p-8 bg-white rounded-lg shadow-lg hover:shadow-xl transition cursor-pointer border-l-4 border-green-500">
                                     <h3 className="text-2xl font-bold mb-4">Сетевые архитектуры</h3>
                                     <p className="text-gray-700 mb-4"> Изучите принципы построения компьютерных сетей </p>

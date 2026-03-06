@@ -21,9 +21,10 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold text-lg mb-4">Курсы</h4>
                         <ul className="space-y-2 text-gray-400">
-                            <li><Link href="/courses/basics" className="hover:text-white transition">Основы</Link></li>
+                            <li><Link href="/courses/architecture" className="hover:text-white transition">Основы</Link></li>
                             <li><Link href="/courses/processors" className="hover:text-white transition">Процессоры</Link></li>
                             <li><Link href="/courses/io" className="hover:text-white transition">Ввод-вывод</Link></li>
+                            <li><Link href="/courses/network" className="hover:text-white transition">Сети</Link></li>
                         </ul>
                     </div>
                     <div>
