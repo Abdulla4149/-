@@ -1,39 +1,21 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-});
+export const config = {
+  runtime: 'edge', // Это ускорит работу и уберет многие ошибки серверов Vercel
+};
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: Request) {
   if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ error: 'Method not allowed' });
+    return new Response('Method not allowed', { status: 405 });
   }
 
-  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    return res.status(500).json({ error: 'Missing GOOGLE_GENERATIVE_AI_API_KEY' });
-  }
+  const { messages } = await req.json();
 
-  try {
-    const { messages } = req.body as {
-      messages: { role: 'system' | 'user' | 'assistant'; content: string }[];
-    };
+  const result = await streamText({
+    model: google('gemini-1.5-flash'),
+    messages,
+  });
 
-    const result = await streamText({
-      model: google('gemini-1.5-flash'),
-      messages,
-    });
-
-    await result.toAIStreamResponse({
-      headers: {
-        'Cache-Control': 'no-store',
-      },
-    }).pipe(res);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error generating response' });
-  }
+  return result.toDataStreamResponse();
 }
-
