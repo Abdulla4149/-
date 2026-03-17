@@ -7,7 +7,7 @@ export default async function handler(req: Request) {
   try {
     
     // const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-    const apiKey = "AIzaSyDlsR9Hb7RJ3EBmYwkkvY1EnmNc2OFvXh0";
+    const apiKey = "AIzaSyCOI9XyViRVQ5Y-XBeSl77qDroSKkXFgn0";
 
     
     if (!apiKey) {
