@@ -22,7 +22,7 @@ export default function CoursesPage() {
         <title>{coursesProgram.programTitle} — Курсы</title>
         <meta
           name="description"
-          content="Пошаговая образовательная траектория: от основ веба до уровня уверенного Frontend специалиста."
+          content="Глубокая образовательная траектория по архитектуре ЭВМ: от логических вентилей до параллельных вычислений."
         />
       </Head>
       <Header />
