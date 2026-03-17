@@ -60,6 +60,9 @@ export default async function handler(req: Request) {
       return new Response(JSON.stringify({ text: "ОШИБКА: Переменная OPENROUTER_API_KEY пуста в Vercel!" }), { status: 200 });
     }
 
+    // Находим последнее сообщение в массиве, который пришел с фронтенда
+    const lastUserMessage = messages[messages.length - 1]?.content || "";
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -68,7 +71,14 @@ export default async function handler(req: Request) {
       },
       body: JSON.stringify({
         "model": "deepseek/deepseek-r1",
-        "messages": messages,
+        "messages": [
+          {
+            "role": "user",
+            "content": lastUserMessage // Это аналог твоего $prompt в PHP
+          }
+        ],
+        "temperature": 0.8,
+        "max_tokens": 6000
       })
     });
 
