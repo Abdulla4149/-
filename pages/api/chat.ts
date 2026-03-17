@@ -11,18 +11,19 @@ export default async function handler(req: Request) {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, system } = await req.json(); // Получаем сообщения И системную инструкцию
 
     const result = await streamText({
       model: google('gemini-1.5-flash'),
+      system: system, // Передаем инструкцию в Gemini
       messages,
     });
 
-    // Важно: в новых версиях используем .toDataStreamResponse()
-    return result.toDataStreamResponse();
+    // Это самый актуальный метод для новых библиотек в package.json
+    return result.toDataStreamResponse(); 
   } catch (error: any) {
-    console.error('Gemini error:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), {
+    console.error("API Error:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

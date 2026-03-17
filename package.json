@@ -9,9 +9,9 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "@ai-sdk/google": "^3.0.43",
+        "ai": "latest",
+        "@ai-sdk/google": "latest",
         "@ai-sdk/react": "latest",
-        "ai": "^6.0.0",
         "clsx": "latest",
         "framer-motion": "latest",
         "lucide-react": "latest",
