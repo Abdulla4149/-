@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useChat } from 'ai/react';
+import { useChat } from '@ai-sdk/react';
 
 function RobotIcon({ className }: { className?: string }) {
   return (
