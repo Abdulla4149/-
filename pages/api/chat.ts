@@ -5,7 +5,10 @@ export const config = { runtime: 'edge' };
 
 export default async function handler(req: Request) {
   try {
-    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    
+    // const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    const apiKey = "AIzaSyDlsR9Hb7RJ3EBmYwkkvY1EnmNc2OFvXh0";
+
     
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API Key missing in Vercel settings' }), { status: 500 });
