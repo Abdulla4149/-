@@ -63,24 +63,28 @@ export default async function handler(req: Request) {
     // Находим последнее сообщение в массиве, который пришел с фронтенда
     const lastUserMessage = messages[messages.length - 1]?.content || "";
 
+// ... (начало кода то же самое)
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey.trim()}`,
         "Content-Type": "application/json",
+        // ДОБАВЬ ЭТИ ДВЕ СТРОЧКИ ОБЯЗАТЕЛЬНО:
+        "HTTP-Referer": "https://komek-arch.vercel.app", // Твой домен на Vercel
+        "X-Title": "KomekArch Learning Platform",
       },
       body: JSON.stringify({
         "model": "deepseek/deepseek-r1",
         "messages": [
-          {
-            "role": "user",
-            "content": lastUserMessage // Это аналог твоего $prompt в PHP
-          }
+          { "role": "user", "content": lastUserMessage }
         ],
-        "temperature": 0.8,
-        "max_tokens": 6000
+        "temperature": 0.7,
+        "max_tokens": 4000
       })
     });
+
+// ... (остальной код тот же)
 
     const result = await response.json();
 
