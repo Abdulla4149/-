@@ -14,14 +14,17 @@ export default async function handler(req: Request) {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, system } = await req.json();
 
     const result = await streamText({
       model: google('gemini-1.5-flash'),
-      messages: await convertToModelMessages(messages),
+      messages: await convertToModelMessages([
+        ...(system ? [{ role: 'system', content: system }] : []),
+        ...(messages ?? []),
+      ]),
     });
 
-    // В v6 для useChat из @ai-sdk/react нужен UI‑стрим
+    // Возвращаем UI-стрим, совместимый с useChat.
     return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error('Chat error:', error);

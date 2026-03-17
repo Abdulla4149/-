@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { UIMessage } from 'ai';
-import { useChat } from '@ai-sdk/react';
+import { useChat } from 'ai/react';
 
 function RobotIcon({ className }: { className?: string }) {
   return (
@@ -50,38 +49,32 @@ function RobotIcon({ className }: { className?: string }) {
 }
 
 export default function AiAssistant() {
-  // Храним стартовые сообщения в удобном виде с content,
-  // а ниже конвертируем их в формат UIMessage (parts) для AI SDK v6.
-  const initialMessagesContent = [
-    {
-      id: 'system-1',
-      role: 'system' as const,
-      content:
-        'Ты — KomekArch AI, эксперт по архитектуре ЭВМ. Помогай студентам разбираться в темах процессоров, памяти и ввода-вывода. Отвечай кратко, понятно и на языке пользователя.',
-    },
-    {
-      id: 'greeting-1',
-      role: 'assistant' as const,
-      content:
-        'Привет! Я KomekArch AI. Спроси меня про процессоры, память, кэш или ввод-вывод — объясню простыми словами.',
-    },
-  ] as const;
+  const systemPrompt =
+    'Ты — KomekArch AI, эксперт по архитектуре ЭВМ. Помогай студентам разбираться в темах процессоров, памяти, кэшей, ISA, конвейеров и параллельных вычислений. Отвечай кратко, понятно и на языке пользователя. Если уместно — давай маленький пример и проверочный вопрос.';
 
-  const initialMessages: UIMessage[] = initialMessagesContent.map((m) => ({
-    id: m.id,
-    role: m.role,
-    parts: [{ type: 'text', text: m.content }],
-  }));
-
-  const { messages, sendMessage, status } = useChat<UIMessage>({
-    messages: initialMessages,
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+  } = useChat({
+    api: '/api/chat',
+    initialMessages: [
+      {
+        id: 'greeting-1',
+        role: 'assistant',
+        content:
+          'Привет! Я KomekArch AI. Спроси меня про процессоры, память, кэш, ISA, конвейеры или параллельность — объясню простыми словами.',
+      },
+    ],
+    body: { system: systemPrompt },
   });
 
   const [isOpen, setIsOpen] = useState(false);
-  const [input, setInput] = useState('');
   const listRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const isLoading = status === 'submitted' || status === 'streaming';
 
   const suggestions = useMemo(
     () => [
@@ -103,18 +96,6 @@ export default function AiAssistant() {
     if (!isOpen) return;
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [isOpen, messages.length]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-  };
-
-  const handleSubmit = (e?: { preventDefault?: () => void }) => {
-    e?.preventDefault?.();
-    const text = input.trim();
-    if (!text) return;
-    void sendMessage({ text });
-    setInput('');
-  };
 
   return (
     <div className="fixed bottom-5 right-5 z-[60]">
@@ -150,38 +131,27 @@ export default function AiAssistant() {
           </div>
 
           <div ref={listRef} className="px-4 py-4 space-y-3 overflow-y-auto h-[calc(100%-164px)]">
-            {messages
-              .filter((m) => m.role !== 'system')
-              .map((m) => {
-                const text = m.parts
-                  .filter((p) => p.type === 'text')
-                  .map((p) => p.text)
-                  .join('');
-                return (
-                  <div
-                    key={m.id}
-                    className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ring-1 ${
-                        m.role === 'user'
-                          ? 'bg-indigo-500/20 ring-indigo-400/30 text-slate-50'
-                          : 'bg-white/5 ring-white/10 text-slate-100'
-                      }`}
-                    >
-                      {text}
-                    </div>
-                  </div>
-                );
-              })}
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ring-1 ${
+                    m.role === 'user'
+                      ? 'bg-indigo-500/20 ring-indigo-400/30 text-slate-50'
+                      : 'bg-white/5 ring-white/10 text-slate-100'
+                  }`}
+                >
+                  {m.content}
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="px-4 py-3 border-t border-white/10">
             <div className="flex gap-2 items-end">
-              <form
-                onSubmit={handleSubmit}
-                className="flex gap-2 items-end w-full"
-              >
+              <form onSubmit={handleSubmit} className="flex gap-2 items-end w-full">
                 <textarea
                   ref={inputRef}
                   value={input}
@@ -190,7 +160,8 @@ export default function AiAssistant() {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
                       if (!input.trim()) return;
-                      handleSubmit(e as any);
+                      // submit via form handler
+                      (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit?.();
                     }
                   }}
                   rows={2}
@@ -206,6 +177,11 @@ export default function AiAssistant() {
                 </button>
               </form>
             </div>
+            {error && (
+              <div className="mt-2 text-xs text-rose-300">
+                Ошибка: {error.message}
+              </div>
+            )}
           </div>
         </div>
       )}
