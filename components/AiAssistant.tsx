@@ -1,23 +1,43 @@
 import React, { useState } from 'react';
-import { useChat } from '@ai-sdk/react';
 
 export default function AiAssistant() {
   const [isOpen, setIsOpen] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
-    api: '/api/chat',
-  });
+  const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const doSend = () => {
+  const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
-    handleSubmit({ preventDefault: () => {} } as any);
+
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
+      });
+
+      const data = await response.json();
+      if (data.text) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
+      } else {
+        throw new Error(data.error || 'Ошибка связи с ИИ');
+      }
+    } catch (err: any) {
+      setMessages(prev => [...prev, { role: 'assistant', content: `Ошибка: ${err.message}` }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) {
     return (
-      <div 
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-5 right-5 bg-indigo-600 text-white p-4 rounded-full shadow-2xl z-[9999] font-bold cursor-pointer hover:scale-105 transition-all"
-      >
+      <div onClick={() => setIsOpen(true)} className="fixed bottom-5 right-5 bg-indigo-600 text-white p-4 rounded-full shadow-2xl z-[9999] font-bold cursor-pointer transition-all">
         Чат с ИИ
       </div>
     );
@@ -34,34 +54,28 @@ export default function AiAssistant() {
         {messages.length === 0 && (
           <div className="text-center text-slate-400 mt-10 text-sm">Задай вопрос об архитектуре ЭВМ!</div>
         )}
-        {messages.map(m => (
-          <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+        {messages.map((m, idx) => (
+          <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <span className={`inline-block max-w-[85%] p-3 rounded-2xl text-sm ${
-              m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white border text-slate-800'
+              m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white border text-slate-800 shadow-sm'
             }`}>
               {m.content}
             </span>
           </div>
         ))}
-        {isLoading && <div className="text-[10px] text-indigo-500 font-bold animate-pulse text-center">Генерирую ответ...</div>}
-        {error && <div className="text-[10px] text-red-500 bg-red-50 p-2 rounded">Ошибка: {error.message}</div>}
+        {isLoading && <div className="text-xs text-indigo-500 font-bold animate-pulse text-center">ИИ подготавливает полный ответ...</div>}
       </div>
 
       <div className="p-4 border-t bg-white flex gap-2">
         <input
           className="flex-1 border border-slate-200 rounded-xl px-4 py-2 text-sm text-black outline-none focus:ring-2 focus:ring-indigo-500"
           value={input}
-          onChange={handleInputChange}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Напиши сообщение..."
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              doSend();
-            }
-          }}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }}
         />
         <div 
-          onClick={doSend}
+          onClick={sendMessage}
           className={`px-4 py-2 rounded-xl text-white text-sm font-bold cursor-pointer transition-all ${
             isLoading || !input.trim() ? 'bg-slate-300' : 'bg-indigo-600 hover:bg-indigo-700'
           }`}
