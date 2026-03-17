@@ -4,23 +4,10 @@ import { useChat } from '@ai-sdk/react';
 export default function AiAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Достаем методы из хука. Добавим onError для отладки прямо в чате
+  // Используем хук напрямую без лишних оберток
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/chat',
   });
-
-  // Улучшенная функция отправки
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // Проверка: если input пустой или еще не загрузился, просто выходим
-    if (!input || typeof input !== 'string' || !input.trim()) {
-      return;
-    }
-
-    handleSubmit(e);
-  };
 
   return (
     <div className="fixed bottom-5 right-5 z-[9999]">
@@ -56,27 +43,34 @@ export default function AiAssistant() {
             ))}
 
             {isLoading && (
-              <div className="text-xs text-indigo-500 animate-pulse">ИИ готовит ответ...</div>
+              <div className="text-xs text-indigo-500 animate-pulse font-medium">ИИ печатает ответ...</div>
             )}
 
             {error && (
-              <div className="text-[10px] text-red-500 bg-red-50 p-2 rounded-lg">
+              <div className="text-[10px] text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">
                 Ошибка: {error.message}
               </div>
             )}
           </div>
 
-          <form onSubmit={handleFormSubmit} className="p-4 bg-white border-t flex gap-2">
+          {/* Важно: handleSubmit вызывается напрямую в onSubmit */}
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }} 
+            className="p-4 bg-white border-t flex gap-2"
+          >
             <input
               className="flex-1 border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-              value={input || ''} // Гарантируем, что значение никогда не будет undefined
+              value={input}
               onChange={handleInputChange}
               placeholder="Введите сообщение..."
               autoComplete="off"
             />
             <button 
               type="submit" 
-              disabled={isLoading || !input?.trim()}
+              disabled={isLoading || !input.trim()}
               className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
             >
               →
