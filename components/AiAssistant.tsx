@@ -15,26 +15,6 @@ export default function AiAssistant() {
     setInput('');
     setIsLoading(true);
 
-    // try {
-    //   const response = await fetch('/api/chat', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ messages: [...messages, userMessage] }),
-    //   });
-
-    //   const data = await response.json();
-    //   if (data.text) {
-    //     setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
-    //   } else {
-    //     throw new Error(data.error || 'Ошибка связи с ИИ');
-    //   }
-    // } catch (err: any) {
-    //   setMessages(prev => [...prev, { role: 'assistant', content: `Ошибка: ${err.message}` }]);
-    // } finally {
-    //   setIsLoading(false);
-    // }
-
-    // Внутри AiAssistant.tsx в функции sendMessage
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -43,10 +23,19 @@ export default function AiAssistant() {
       });
 
       const data = await response.json();
-      // Просто выводим то, что пришло в поле text, даже если там описание ошибки
-      setMessages(prev => [...prev, { role: 'assistant', content: data.text || 'Нет данных' }]);
+      
+      // Если пришел текст (даже если это текст ошибки), выводим его
+      if (data.text) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
+      } else if (data.error) {
+        setMessages(prev => [...prev, { role: 'assistant', content: `Ошибка: ${data.error}` }]);
+      }
     } catch (err: any) {
-      setMessages(prev => [...prev, { role: 'assistant', content: `FRONTEND ERROR: ${err.message}` }]);
+      console.error("Frontend Error:", err);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Ошибка соединения. Попробуй еще раз." }]);
+    } finally {
+      // КРИТИЧНО: всегда выключаем режим загрузки, чтобы кнопка снова стала активной
+      setIsLoading(false);
     }
   };
 
