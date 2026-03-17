@@ -220,6 +220,15 @@ export default function CourseLessonPage() {
   const rawId = router.query.id;
   const id = typeof rawId === 'string' ? rawId : null;
 
+  useEffect(() => {
+    if (!id) return;
+    void router.replace(
+      { pathname: '/course/architecture', query: { step: id } },
+      undefined,
+      { shallow: true },
+    );
+  }, [id, router]);
+
   const course = useMemo<CourseLesson | undefined>(
     () => (id ? coursesById[id] : undefined),
     [id],

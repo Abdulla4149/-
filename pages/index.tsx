@@ -60,7 +60,7 @@ export default function Home() {
                                 const accent = ['text-blue-600', 'text-purple-600', 'text-cyan-600', 'text-green-600'][idx] ?? 'text-blue-600';
 
                                 return (
-                                    <Link key={m.id} href={`/courses/${m.id}`}>
+                                    <Link key={m.id} href={`/course/architecture?step=${m.id}`}>
                                         <div className={`p-8 bg-white rounded-lg shadow-lg hover:shadow-xl transition cursor-pointer border-l-4 ${border}`}>
                                             <h3 className="text-2xl font-bold mb-4">{m.title}</h3>
                                             <p className="text-gray-700 mb-4">{m.description}</p>

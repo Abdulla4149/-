@@ -83,7 +83,7 @@ export default function CoursesPage() {
 
                     <div className="mt-auto pt-4">
                       <Link
-                        href={`/courses/${module.id}`}
+                        href={`/course/architecture?step=${module.id}`}
                         className="w-full inline-flex justify-center items-center px-4 py-2.5 rounded-lg bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition"
                       >
                         Открыть этап
