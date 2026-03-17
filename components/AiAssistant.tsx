@@ -1,83 +1,48 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useChat } from '@ai-sdk/react';
 
 export default function AiAssistant() {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  // Используем хук напрямую без лишних оберток
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
-    api: '/api/chat',
-  });
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
+
+  if (!isOpen) {
+    return (
+      <button 
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-5 right-5 bg-blue-600 text-white p-4 rounded-full shadow-xl z-50 font-bold"
+      >
+        Чат с ИИ
+      </button>
+    );
+  }
 
   return (
-    <div className="fixed bottom-5 right-5 z-[9999]">
-      <button 
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl hover:bg-indigo-700 transition-all font-bold"
-      >
-        {isOpen ? 'Закрыть' : 'Чат с ИИ'}
-      </button>
-
-      {isOpen && (
-        <div className="absolute bottom-20 right-0 w-[350px] h-[500px] bg-white border border-slate-200 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-          <div className="bg-slate-900 p-4 text-white font-bold text-center">
-            KomekArch AI
+    <div className="fixed bottom-5 right-5 w-80 h-[450px] bg-white border-2 border-slate-200 shadow-2xl rounded-2xl flex flex-col z-50 overflow-hidden">
+      <div className="bg-slate-900 p-3 text-white flex justify-between items-center">
+        <span className="font-bold">KomekArch AI</span>
+        <button onClick={() => setIsOpen(false)}>✕</button>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-50 text-slate-800">
+        {messages.map(m => (
+          <div key={m.id} className={m.role === 'user' ? 'text-right' : 'text-left'}>
+            <span className={`inline-block p-2 rounded-lg text-sm ${m.role === 'user' ? 'bg-blue-500 text-white' : 'bg-slate-200'}`}>
+              {m.content}
+            </span>
           </div>
+        ))}
+        {isLoading && <div className="text-xs text-blue-500 animate-pulse">ИИ думает...</div>}
+      </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
-            {messages.length === 0 && (
-              <div className="text-slate-400 text-center text-sm mt-10">
-                Спроси что-нибудь об архитектуре ЭВМ
-              </div>
-            )}
-            
-            {messages.map(m => (
-              <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
-                  m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white border text-slate-800'
-                }`}>
-                  {m.content}
-                </div>
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className="text-xs text-indigo-500 animate-pulse font-medium">ИИ печатает ответ...</div>
-            )}
-
-            {error && (
-              <div className="text-[10px] text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">
-                Ошибка: {error.message}
-              </div>
-            )}
-          </div>
-
-          {/* Важно: handleSubmit вызывается напрямую в onSubmit */}
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit(e);
-            }} 
-            className="p-4 bg-white border-t flex gap-2"
-          >
-            <input
-              className="flex-1 border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-              value={input}
-              onChange={handleInputChange}
-              placeholder="Введите сообщение..."
-              autoComplete="off"
-            />
-            <button 
-              type="submit" 
-              disabled={isLoading || !input.trim()}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
-              →
-            </button>
-          </form>
-        </div>
-      )}
+      <form onSubmit={handleSubmit} className="p-3 border-t flex gap-2 bg-white">
+        <input
+          className="flex-1 border p-2 rounded text-sm text-black outline-none"
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Спроси что-нибудь..."
+        />
+        <button type="submit" className="bg-blue-600 text-white px-3 rounded">→</button>
+      </form>
     </div>
   );
 }
