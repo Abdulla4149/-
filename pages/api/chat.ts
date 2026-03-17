@@ -1,34 +1,3 @@
-// import { google } from '@ai-sdk/google';
-// import { generateText } from 'ai'; // Меняем импорт!
-
-// export const config = { runtime: 'edge' };
-
-// export default async function handler(req: Request) {
-//   try {
-//     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-//       return new Response(JSON.stringify({ error: 'Missing API Key' }), { status: 500 });
-//     }
-
-//     const { messages } = await req.json();
-
-//     // Ждем полной генерации ответа
-//     const { text } = await generateText({
-//       model: google('gemini-1.5-flash'),
-//       system: 'Ты — эксперт по архитектуре ЭВМ. Отвечай кратко и понятно.',
-//       messages,
-//     });
-
-//     // Возвращаем обычный JSON объект, который легко прочитать фронтенду
-//     return new Response(JSON.stringify({ text }), {
-//       headers: { 'Content-Type': 'application/json' },
-//     });
-//   } catch (error: any) {
-//     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
-//   }
-// }
-
-
-
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 
@@ -39,15 +8,15 @@ export default async function handler(req: Request) {
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Ключ API не найден в Vercel' }), { status: 500 });
+      return new Response(JSON.stringify({ error: 'API Key missing in Vercel settings' }), { status: 500 });
     }
 
     const { messages } = await req.json();
 
     const { text } = await generateText({
-      // Мы явно указываем модель. Если flash не находит, попробуем gemini-1.5-pro
-      model: google('models/gemini-1.5-flash'), 
-      system: 'Ты — эксперт по архитектуре ЭВМ. Отвечай кратко.',
+      // Использование 'gemini-1.5-flash-latest' часто решает проблему v1beta
+      model: google('gemini-1.5-flash-latest'), 
+      system: 'Ты — эксперт по архитектуре ЭВМ. Отвечай на русском языке.',
       messages,
     });
 
@@ -55,9 +24,11 @@ export default async function handler(req: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
-    console.error('Ошибка Gemini:', error);
+    console.error('Gemini Error:', error);
+    
+    // Если flash всё равно не найден, попробуй вручную в коде заменить на 'gemini-1.5-pro'
     return new Response(JSON.stringify({ 
-      error: 'Ошибка модели. Попробуй позже.',
+      error: 'Ошибка модели', 
       details: error.message 
     }), { status: 500 });
   }
