@@ -18,7 +18,6 @@ export default function Header() {
                         <Link href="/" className={`font-semibold transition ${router.pathname === '/' ? 'text-blue-600' : 'hover:text-blue-600'}`}> Главная </Link>
                         <Link href="/courses" className={`font-semibold transition ${router.pathname === '/courses' ? 'text-blue-600' : 'hover:text-blue-600'}`}> Курсы </Link>
                         <Link href="/about" className={`font-semibold transition ${router.pathname === '/about' ? 'text-blue-600' : 'hover:text-blue-600'}`}> О нас </Link>
-                        <Link href="/contact" className={`font-semibold transition ${router.pathname === '/contact' ? 'text-blue-600' : 'hover:text-blue-600'}`}> Контакты </Link>
                     </nav>
                     <button onClick={() => router.push('/login')} className="hidden md:block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"> Вход </button>
                 </div>
