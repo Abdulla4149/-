@@ -26,11 +26,12 @@ export default function AiAssistant() {
       if (data.text) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
       } else if (data.error) {
-        setMessages(prev => [...prev, { role: 'assistant', content: Ошибка: ${data.error} }]);
+        // ИСПРАВЛЕНО: Добавлены обратные кавычки
+        setMessages(prev => [...prev, { role: 'assistant', content: `Ошибка: ${data.error}` }]);
       }
     } catch (err: any) {
       console.error("Frontend Error:", err);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Ошибка соединения." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Ошибка соединения. Попробуй еще раз." }]);
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +57,8 @@ export default function AiAssistant() {
           <div className="text-center text-slate-400 mt-10 text-sm">Задай вопрос об архитектуре ЭВМ!</div>
         )}
         {messages.map((m, idx) => (
-          <div key={idx} className={flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}}>
+          // ИСПРАВЛЕНО: Добавлены обратные кавычки в className
+          <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <span className={`inline-block max-w-[85%] p-3 rounded-2xl text-sm ${
               m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white border text-slate-800 shadow-sm'
             }`}>
@@ -64,7 +66,7 @@ export default function AiAssistant() {
             </span>
           </div>
         ))}
-        {isLoading && <div className="text-xs text-indigo-500 font-bold animate-pulse text-center p-2">ИИ думает...</div>}
+        {isLoading && <div className="text-xs text-indigo-500 font-bold animate-pulse text-center">ИИ подготавливает полный ответ...</div>}
       </div>
 
       <div className="p-4 border-t bg-white flex gap-2">
