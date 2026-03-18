@@ -11,7 +11,6 @@ export default function AiAssistant() {
 
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
@@ -24,7 +23,6 @@ export default function AiAssistant() {
 
       const data = await response.json();
       
-      // Если пришел текст (даже если это текст ошибки), выводим его
       if (data.text) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
       } else if (data.error) {
@@ -32,9 +30,8 @@ export default function AiAssistant() {
       }
     } catch (err: any) {
       console.error("Frontend Error:", err);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Ошибка соединения. Попробуй еще раз." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Ошибка соединения." }]);
     } finally {
-      // КРИТИЧНО: всегда выключаем режим загрузки, чтобы кнопка снова стала активной
       setIsLoading(false);
     }
   };
@@ -67,7 +64,7 @@ export default function AiAssistant() {
             </span>
           </div>
         ))}
-        {isLoading && <div className="text-xs text-indigo-500 font-bold animate-pulse text-center">ИИ подготавливает полный ответ...</div>}
+        {isLoading && <div className="text-xs text-indigo-500 font-bold animate-pulse text-center p-2">ИИ думает...</div>}
       </div>
 
       <div className="p-4 border-t bg-white flex gap-2">
