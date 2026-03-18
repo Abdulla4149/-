@@ -19,7 +19,6 @@ export default function AiAssistant() {
 
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
@@ -33,13 +32,13 @@ export default function AiAssistant() {
       const data = await response.json();
       
       if (data.text) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.text }]);
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.text }]);
       } else if (data.error) {
-        setMessages(prev => [...prev, { role: 'assistant', content: Ошибка: ${data.error} }]);
+        setMessages((prev) => [...prev, { role: 'assistant', content: Ошибка: ${data.error} }]);
       }
     } catch (err: any) {
       console.error("Frontend Error:", err);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Ошибка соединения. Попробуй еще раз." }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: "Ошибка соединения. Попробуй еще раз." }]);
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +58,7 @@ export default function AiAssistant() {
   return (
     <div className="fixed bottom-6 right-6 w-[380px] h-[550px] bg-white border border-blue-100 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2rem] flex flex-col z-[9999] overflow-hidden text-slate-800 animate-in fade-in slide-in-from-bottom-8 duration-300">
       
-      {/* Шапка чата в стиле сайта */}
+      {/* Шапка чата */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-5 text-white flex justify-between items-center shadow-lg">
         <div className="flex items-center gap-3">
           <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md font-bold text-lg">🤖</div>
@@ -91,51 +90,4 @@ export default function AiAssistant() {
         )}
         
         {messages.map((m, idx) => (
-          <div key={idx} className={flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2}>
-            <div className={`max-w-[85%] p-4 rounded-2xl text-[13px] leading-relaxed shadow-sm ${
-              m.role === 'user' 
-                ? 'bg-blue-600 text-white rounded-tr-none' 
-                : 'bg-white border border-blue-50 text-slate-700 rounded-tl-none'
-            }`}>
-              {m.content}
-            </div>
-          </div>
-        ))}
-
-        {isLoading && (
-          <div className="flex justify-start animate-pulse">
-            <div className="bg-slate-200 h-8 w-24 rounded-full flex items-center justify-center gap-1">
-              <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
-              <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-              <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Поле ввода */}
-      <div className="p-4 bg-white border-t border-slate-100">
-        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl focus-within:ring-2 focus-within:ring-blue-600 focus-within:bg-white transition-all shadow-inner">
-          <input
-            className="flex-1 bg-transparent border-none px-3 py-2 text-[13px] text-slate-900 outline-none placeholder:text-slate-400"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Спроси о процессорах или памяти..."
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }}
-          />
-          <button 
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md active:scale-90 ${
-              isLoading || !input.trim() 
-                ? 'bg-slate-300 text-slate-400 cursor-not-allowed' 
-                : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-blue-200'
-            }`}
-          >
-            {isLoading ? "⏳" : "➤"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+          <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end'
