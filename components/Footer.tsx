@@ -30,8 +30,8 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold text-lg mb-4">Свяжитесь с нами</h4>
                         <ul className="space-y-2 text-gray-400">
-                            <li>Email: info@komekarch.com</li>
-                            <li>Телефон: +7 (777) 123-45-67</li>
+                            <li>Instagram: baltabay909</li>
+                            <li>Телефон: +7 (777) 206-77-03</li>
                         </ul>
                     </div>
                 </div>
