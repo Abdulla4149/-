@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 "use client";
 
-=======
->>>>>>> 7f2ffcc725ec13f615ea9154ce283db63990c31d
 import React, { useState, useEffect, useRef } from 'react';
 // Импортируем иконки (убедитесь, что lucide-react установлен)
 import { Bot, X, MessageSquareText, SendHorizonal, Loader2 } from 'lucide-react';
