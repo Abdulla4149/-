@@ -42,7 +42,7 @@ export default function Header() {
                                 {session.user?.name || session.user?.email}
                             </div>
                             <button
-                                onClick={() => signOut({ callbackUrl: "/" })}
+                                onClick={() => signOut({ callbackUrl: '/' })}
                                 className="bg-slate-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-slate-800 transition"
                             >
                                 Sign Out

@@ -34,16 +34,13 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        // Если ошибка есть, выводим понятный текст
-        if (res.error === "CredentialsSignin") {
-          setServerError("Неверный email или пароль");
-        } else {
-          setServerError("Произошла ошибка при входе. Попробуйте еще раз.");
-        }
+        // Ошибка авторизации: остаемся на странице логина, редиректов нет.
+        setServerError("Неверный email или пароль");
         setIsLoading(false);
         return;
       }
 
+      // Редирект только при успешной авторизации и отсутствии ошибки.
       if (res?.ok) {
         router.push("/");
         router.refresh();
