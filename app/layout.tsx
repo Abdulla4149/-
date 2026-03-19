@@ -2,6 +2,8 @@ import "../styles/globals.css";
 import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import AiAssistant from "@/components/AiAssistant";
+import Header from "@/components/Header";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "KomekArch",
@@ -19,9 +21,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="theme-color" content="#1e40af" />
       </head>
       <body>
-        {children}
-        <AiAssistant />
-        <Footer />
+        <Providers>
+          <Header />
+          {children}
+          <AiAssistant />
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
