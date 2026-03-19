@@ -131,6 +131,24 @@ function MarkdownContent({ value }: { value: string }) {
         while (i < lines.length) {
           const line = lines[i] ?? '';
 
+          const image = line.match(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/);
+          if (image) {
+            const alt = image[1] ?? 'image';
+            const src = image[2] ?? '';
+            blocks.push(
+              <div key={`img-${idx}-${i}`} className="my-8 flex justify-center">
+                <img
+                  src={src}
+                  alt={alt}
+                  className="rounded-xl shadow-md max-w-full h-auto"
+                  loading="lazy"
+                />
+              </div>,
+            );
+            i++;
+            continue;
+          }
+
           if (/^\s*---\s*$/.test(line)) {
             blocks.push(<hr key={`hr-${idx}-${i}`} className="border-gray-200" />);
             i++;
@@ -171,6 +189,22 @@ function MarkdownContent({ value }: { value: string }) {
                   <li key={`li-${idx}-${i}-${j}`}>{renderInline(it)}</li>
                 ))}
               </ul>,
+            );
+            continue;
+          }
+
+          if (/^\s*\d+\.\s+/.test(line)) {
+            const items: string[] = [];
+            while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i] ?? '')) {
+              items.push((lines[i] ?? '').replace(/^\s*\d+\.\s+/, ''));
+              i++;
+            }
+            blocks.push(
+              <ol key={`ol-${idx}-${i}`} className="list-decimal pl-6 space-y-1 text-gray-700">
+                {items.map((it, j) => (
+                  <li key={`oli-${idx}-${i}-${j}`}>{renderInline(it)}</li>
+                ))}
+              </ol>,
             );
             continue;
           }
