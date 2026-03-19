@@ -25,21 +25,31 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setServerError(null);
     setIsLoading(true);
+    
     try {
       const res = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: false,
+        redirect: false, // Оставляем false, чтобы страница не перезагружалась
       });
 
-      if (!res?.ok) {
-        setServerError(res?.error || "Не удалось войти");
+      if (res?.error) {
+        // Если ошибка есть, выводим понятный текст
+        if (res.error === "CredentialsSignin") {
+          setServerError("Неверный email или пароль");
+        } else {
+          setServerError("Произошла ошибка при входе. Попробуйте еще раз.");
+        }
+        setIsLoading(false);
         return;
       }
 
-      router.push("/");
-      router.refresh();
-    } finally {
+      if (res?.ok) {
+        router.push("/");
+        router.refresh();
+      }
+    } catch (error) {
+      setServerError("Ошибка сети. Проверьте подключение.");
       setIsLoading(false);
     }
   };
@@ -56,9 +66,10 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
+          {/* Блок отображения ошибки */}
           {serverError && (
-            <div className="flex items-start gap-2 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-red-700">
-              <AlertTriangle className="w-5 h-5 mt-0.5" />
+            <div className="flex items-start gap-2 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-red-700 animate-in slide-in-from-top-2 duration-300">
+              <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
               <div className="text-sm font-semibold">{serverError}</div>
             </div>
           )}
@@ -132,4 +143,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
