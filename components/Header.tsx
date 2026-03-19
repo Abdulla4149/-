@@ -38,16 +38,21 @@ export default function Header() {
                     </nav>
                     {status === "authenticated" ? (
                         <div className="hidden md:flex items-center gap-3">
-                            <div className="text-sm font-bold text-slate-700">
-                                {session.user?.name || session.user?.email}
-                            </div>
-                            <button
-                                onClick={() => signOut({ callbackUrl: '/' })}
-                                className="bg-slate-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-slate-800 transition"
-                            >
-                                Sign Out
-                            </button>
+                        <div className="text-sm font-bold text-slate-700">
+                            {session.user?.name || session.user?.email}
                         </div>
+                        <button
+                            onClick={async () => {
+                                // 1. Отключаем автоматический редирект библиотеки
+                                await signOut({ redirect: false });
+                                // 2. Принудительно отправляем на главную страницу текущего домена
+                                window.location.href = "/";
+                            }}
+                            className="bg-slate-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-slate-800 transition"
+                        >
+                            Sign Out
+                        </button>
+                    </div>
                     ) : (
                         <Link
                             href="/login"
