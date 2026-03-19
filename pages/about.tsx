@@ -11,7 +11,7 @@ const TeamSection = () => {
     },
     {
       name: "Мухаметжанова Жанар",
-      role: "Manager",
+      role: "Project-manager",
       icon: <ClipboardList className="w-6 h-6 text-blue-600" />,
       description: "Управление задачами в Trello, отчетность."
     },
