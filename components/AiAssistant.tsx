@@ -1,14 +1,51 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from "next/link";
 // Импортируем иконки (убедитесь, что lucide-react установлен)
 import { Bot, X, MessageSquareText, SendHorizonal, Loader2 } from 'lucide-react';
+import { useSession } from "next-auth/react";
 
 export default function AiAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: string, content: string }[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { status } = useSession();
+  const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
+
+  const loadHistory = async () => {
+    try {
+      const res = await fetch("/api/chat/history");
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (!Array.isArray(data?.messages)) return;
+
+      setMessages(
+        data.messages.map((m: any) => ({
+          role: String(m.role),
+          content: String(m.content),
+        }))
+      );
+    } catch (err) {
+      console.error("Failed to load chat history:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      if (!hasLoadedHistory) {
+        setHasLoadedHistory(true);
+        loadHistory();
+      }
+      return;
+    }
+
+    // If logged out, clear chat UI and allow re-loading later after login.
+    setHasLoadedHistory(false);
+    setMessages([]);
+  }, [status]);
 
   // Автопрокрутка вниз при новом сообщении
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -21,9 +58,20 @@ export default function AiAssistant() {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
+    if (status !== "authenticated") {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Пожалуйста, войдите в аккаунт, чтобы сохранять историю чата.",
+        },
+      ]);
+      return;
+    }
+
     const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
-    const currentInput = input;
+    const payloadMessages = [...messages, userMessage];
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
@@ -31,7 +79,7 @@ export default function AiAssistant() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+        body: JSON.stringify({ messages: payloadMessages }),
       });
 
       const data = await response.json();
@@ -42,6 +90,9 @@ export default function AiAssistant() {
         // ИСПРАВЛЕНО: Добавлены обратные кавычки для интерполяции
         setMessages((prev) => [...prev, { role: 'assistant', content: `Ошибка: ${data.error}` }]);
       }
+
+      // Синхронизируем UI с тем, что реально сохранено в базе
+      await loadHistory();
     } catch (err: any) {
       console.error("Frontend Error:", err);
       setMessages((prev) => [...prev, { role: 'assistant', content: "Ошибка соединения. Попробуй еще раз." }]);
@@ -92,9 +143,23 @@ export default function AiAssistant() {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-3 opacity-60">
             <div className="text-4xl">📚</div>
-            <p className="text-sm font-medium px-8 text-slate-500 italic">
-              "Привет! Я помогу тебе разобраться в архитектуре ЭВМ. Что хочешь узнать?"
-            </p>
+            {status === "authenticated" ? (
+              <p className="text-sm font-medium px-8 text-slate-500 italic">
+                "Привет! Я помогу тебе разобраться в архитектуре ЭВМ. Что хочешь узнать?"
+              </p>
+            ) : (
+              <div className="space-y-2 px-8">
+                <p className="text-sm font-medium text-slate-500 italic">
+                  Войдите в аккаунт, чтобы сохранять историю чата.
+                </p>
+                <Link
+                  href="/login"
+                  className="text-xs font-bold text-blue-600 hover:underline transition-colors"
+                >
+                  Перейти к входу
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
@@ -125,16 +190,17 @@ export default function AiAssistant() {
       <div className="p-4 bg-white border-t border-slate-100">
         <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl focus-within:ring-2 focus-within:ring-blue-600 focus-within:bg-white transition-all shadow-inner">
           <input
-            className="flex-1 bg-transparent border-none px-3 py-2 text-[13px] text-slate-900 outline-none placeholder:text-slate-400"
+            className="flex-1 bg-transparent border-none px-3 py-2 text-[13px] text-slate-900 outline-none placeholder:text-slate-400 disabled:opacity-60 disabled:cursor-not-allowed"
             value={input}
+            disabled={status !== "authenticated"}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Спроси о процессорах или памяти..."
+            placeholder={status === "authenticated" ? "Спроси о процессорах или памяти..." : "Войдите в аккаунт"}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }}
           />
           <button
             onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md active:scale-90 ${isLoading || !input.trim()
+            disabled={isLoading || !input.trim() || status !== "authenticated"}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md active:scale-90 ${(isLoading || !input.trim() || status !== "authenticated")
                 ? 'bg-slate-300 text-slate-400 cursor-not-allowed'
                 : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-blue-200'
               }`}
