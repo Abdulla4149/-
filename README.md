@@ -1,6 +1,8 @@
 # KomekArch - Сайт для изучения компьютерной архитектуры
-<img width="1408" height="768" alt="Сурет «KomekArch» платформасының функционалдық блок-схемасы" src="https://github.com/user-attachments/assets/30a10eab-1d34-4242-9499-045e96a70595" />
-<img width="1408" height="768" alt="«KomekArch» платформасының байланыс логикасы мен деректер ағынының схемасы (Data and Logic Flow Diagram)" src="https://github.com/user-attachments/assets/f7792219-b08a-43a2-b5c1-9ed9bb3f68e5" />
+<img width="1244" height="768" alt="«KomekArch» платформасының байланыс логикасы мен деректер ағынының схемасы (Data and Logic Flow Diagram)" src="https://github.com/user-attachments/assets/1b47c36d-d56c-493a-aa65-43e282ca896d" />
+
+<img width="1408" height="768" alt="Сурет «KomekArch» платформасының функционалдық блок-схемасы" src="https://github.com/user-attachments/assets/a7c8bc5c-c993-4673-a2ce-efdefae7f611" />
+
 
 ## Описание
 Интерактивный образовательный сайт для изучения основ компьютерной архитектуры с помощью ИИ-ассистента.
